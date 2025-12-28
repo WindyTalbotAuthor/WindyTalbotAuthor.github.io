@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Droplet & Sky: Analytical Anthology</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dry-sand: #EBDCCB;
+            --wet-sand: #8F7D6B;
+            --pastel-pink: #FFC1D3;
+            --pastel-peach: #FFDAB9;
+            --pastel-aqua: #ADD8E6;
+            --pastel-lilac: #D8BFD8;
+        }
+        
+        body {
+            font-family: 'Lora', serif;
+            background-color: #fdfbf7; /* Very light sand tint */
+            color: var(--wet-sand);
+        }
+
+        h1, h2, h3, .heading-font {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Custom Scrollbar for the poem viewer */
+        .poem-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .poem-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .poem-scroll::-webkit-scrollbar-thumb {
+            background: var(--wet-sand);
+            border-radius: 4px;
+        }
+        .poem-scroll::-webkit-scrollbar-thumb:hover {
+            background: #7a6a5b;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            height: 300px;
+        }
+
+        .btn-interactive {
+            transition: all 0.3s ease;
+        }
+        .btn-interactive:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .active-poem {
+            background-color: var(--wet-sand);
+            color: white;
+            border-left: 4px solid var(--pastel-peach);
+        }
+        
+        .inactive-poem {
+            background-color: white;
+            color: var(--wet-sand);
+            border-left: 4px solid transparent;
+        }
+        .inactive-poem:hover {
+            background-color: var(--dry-sand);
+        }
+
+        /* Subtle Fade In Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="w-full bg-[#8F7D6B] text-[#EBDCCB] shadow-md p-4 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">💧</span>
+                <h1 class="text-2xl font-bold tracking-wide">Droplet & Sky <span class="text-sm font-normal opacity-80 ml-2">| Analytical Anthology</span></h1>
+            </div>
+            <div class="hidden md:block text-sm italic">
+                "The universe, reflected, me."
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8">
+
+        <!-- Introduction Section -->
+        <section class="bg-white rounded-xl shadow-sm p-6 border-t-4 border-[#ADD8E6] animate-fade-in">
+            <h2 class="text-2xl font-bold text-[#8F7D6B] mb-2">Collection Overview</h2>
+            <p class="text-gray-600 leading-relaxed">
+                Welcome to the analytical view of the <strong>"Droplet and Sky"</strong> collection. This dashboard synthesizes the core texts to explore the thematic density of interconnectedness. 
+                Use the interactive controls below to analyze the emotional resonance and elemental balance (Water vs. Air) within each piece. 
+                We observe how the "Dry Sand" of our physical reality grounds the "Pastel" fluidity of our spiritual metaphors.
+            </p>
+        </section>
+
+        <!-- KPI Row -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 animate-fade-in" style="animation-delay: 0.1s;">
+            <!-- KPI 1 -->
+            <div class="bg-[#EBDCCB] rounded-lg p-4 shadow-sm flex flex-col items-center justify-center text-[#8F7D6B]">
+                <span class="text-4xl font-bold heading-font" id="total-poems">3</span>
+                <span class="text-sm uppercase tracking-wider font-semibold mt-1">Total Works</span>
+            </div>
+            <!-- KPI 2 -->
+            <div class="bg-white border border-[#EBDCCB] rounded-lg p-4 shadow-sm flex flex-col items-center justify-center text-[#8F7D6B]">
+                <span class="text-4xl font-bold heading-font" id="avg-words">0</span>
+                <span class="text-sm uppercase tracking-wider font-semibold mt-1">Avg. Word Count</span>
+            </div>
+            <!-- KPI 3 -->
+            <div class="bg-white border border-[#EBDCCB] rounded-lg p-4 shadow-sm flex flex-col items-center justify-center text-[#8F7D6B]">
+                <span class="text-4xl font-bold heading-font">Infinite</span>
+                <span class="text-sm uppercase tracking-wider font-semibold mt-1">Thematic Scope</span>
+            </div>
+            <!-- KPI 4 -->
+            <div class="bg-[#D8BFD8] bg-opacity-30 rounded-lg p-4 shadow-sm flex flex-col items-center justify-center text-[#6B5B4D]">
+                <span class="text-4xl font-bold heading-font">Non-Dual</span>
+                <span class="text-sm uppercase tracking-wider font-semibold mt-1">Core Philosophy</span>
+            </div>
+        </div>
+
+        <!-- Interactive Core: Reading & Radar -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in" style="animation-delay: 0.2s;">
+            
+            <!-- Selector (Left Col) -->
+            <div class="lg:col-span-3 flex flex-col gap-3">
+                <h3 class="text-lg font-bold text-[#8F7D6B] border-b-2 border-[#EBDCCB] pb-2">Select Analysis</h3>
+                <div id="poem-list" class="flex flex-col gap-2">
+                    <!-- Buttons injected via JS -->
+                </div>
+                
+                <div class="bg-[#EBDCCB] bg-opacity-40 p-4 rounded-lg mt-4 text-sm">
+                    <h4 class="font-bold mb-1">Analyst Note:</h4>
+                    <p id="analyst-note" class="italic text-gray-700">Select a poem to view specific insights.</p>
+                </div>
+            </div>
+
+            <!-- Reading Pane (Center Col) -->
+            <div class="lg:col-span-5 bg-white rounded-xl shadow-md border border-[#EBDCCB] flex flex-col overflow-hidden h-[500px]">
+                <div class="bg-[#EBDCCB] p-3 flex justify-between items-center">
+                    <h3 class="font-bold text-[#8F7D6B]" id="display-title">Title Placeholder</h3>
+                    <span class="text-xs bg-white px-2 py-1 rounded text-[#8F7D6B]" id="display-author">Author</span>
+                </div>
+                <div class="p-8 overflow-y-auto flex-grow poem-scroll bg-[#faf8f5] relative">
+                    <!-- Watermark -->
+                    <div class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+                        <span class="text-9xl">💧</span>
+                    </div>
+                    <p id="display-content" class="text-lg leading-loose whitespace-pre-wrap relative z-10">
+                        Select a poem to begin reading...
+                    </p>
+                </div>
+            </div>
+
+            <!-- Radar Chart (Right Col) -->
+            <div class="lg:col-span-4 bg-white rounded-xl shadow-md p-4 border border-[#EBDCCB] flex flex-col">
+                <h3 class="text-lg font-bold text-[#8F7D6B] mb-4 text-center">Thematic Resonance</h3>
+                <div class="flex-grow flex items-center justify-center bg-[#fdfbf7] rounded-lg">
+                    <div class="chart-container">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+                <p class="text-xs text-center text-gray-500 mt-2">
+                    Visualizing the balance between the internal (Self) and the external (Cosmos).
+                </p>
+            </div>
+        </div>
+
+        <!-- Comparative Analysis Section -->
+        <section class="bg-white rounded-xl shadow-md p-6 border border-[#EBDCCB] animate-fade-in" style="animation-delay: 0.3s;">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-6 border-b border-[#EBDCCB] pb-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-[#8F7D6B]">Elemental Frequency Distribution</h2>
+                    <p class="text-sm text-gray-500 mt-1">Analyzing the lexical choice: Grounded Earth vs. Fluid Sky terminology across the collection.</p>
+                </div>
+            </div>
+            
+            <div class="w-full h-80">
+                <div class="chart-container" style="height: 320px; max-height: 320px;">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-[#8F7D6B] text-[#EBDCCB] p-6 mt-8 text-center">
+        <p class="text-sm opacity-80">&copy; 2025 Droplet & Sky Analytics. Designed with Organic Harmony.</p>
+    </footer>
+
+    <!-- Logic -->
+    <script>
+        // --- 1. Data Source (The Report) ---
+        const poems = [
+            {
+                id: 1,
+                title: "Echoes of the Infinite",
+                author: "A. Seeker",
+                content: "I am the droplet, a shimmering sphere,\nReflecting boundless sky, so clear.\nWithin my curve, the cosmos sleeps,\nA tiny world where wisdom seeps.\n\nI am the sky, a canvas grand,\nWhere stars ignite, and galaxies expand.\nEmbracing storms, and sun's soft kiss,\nA boundless dream, eternal bliss.\n\nIn droplet's heart, the sky resides,\nIn sky's vast reach, a droplet hides.\nOne breath, one being, ever free,\nThe universe, reflected, me.",
+                themes: { Self: 80, Cosmos: 90, Nature: 60, Unity: 100 },
+                note: "High focus on 'Unity', bridging the gap between the micro (droplet) and macro (cosmos).",
+                wordStats: { water: 3, sky: 5, earth: 1 } // Simulated counts
+            },
+            {
+                id: 2,
+                title: "Boundless Self",
+                author: "R. Mystic",
+                content: "A tiny pearl of dew I stand,\nUpon a leaf, across the land.\nYet in my depths, the azure hue,\nOf endless sky, profound and true.\n\nI am the vast, the open space,\nWhere clouds drift by with gentle grace.\nAnd in that space, a droplet's gleam,\nReveals a universal dream.\n\nNo separation, false and thin,\nThe drop, the sky, from deep within.\nConnected spirit, whole and bright,\nIlluminating inner light.",
+                themes: { Self: 95, Cosmos: 50, Nature: 85, Unity: 70 },
+                note: "Strong 'Self' orientation, using the 'dew' as a metaphor for personal internal depth.",
+                wordStats: { water: 4, sky: 4, earth: 2 }
+            },
+            {
+                id: 3,
+                title: "Cosmic Connection",
+                author: "E. Poet",
+                content: "From ocean's vast, a vapor lifts,\nTo join the clouds, through atmospheric rifts.\nI rise, I fall, a cycle grand,\nA droplet born of sea and sand.\n\nBut higher still, I reach the blue,\nThe endless vault, forever new.\nAnd in that height, I find my claim,\nTo be the sky, more than a name.\n\nFor atoms dance, a cosmic art,\nAnd bind the whole, each separate part.\nI am the droplet, brief and small,\nI am the sky, embracing all.",
+                themes: { Self: 40, Cosmos: 85, Nature: 90, Unity: 80 },
+                note: "Emphasis on 'Nature' and the physical cycle (vapor, clouds, rain) as a spiritual journey.",
+                wordStats: { water: 6, sky: 3, earth: 4 }
+            }
+        ];
+
+        // --- 2. State Management ---
+        let currentPoemIndex = 0;
+        let radarChartInstance = null;
+        let barChartInstance = null;
+
+        // --- 3. DOM Elements ---
+        const poemListEl = document.getElementById('poem-list');
+        const titleEl = document.getElementById('display-title');
+        const authorEl = document.getElementById('display-author');
+        const contentEl = document.getElementById('display-content');
+        const noteEl = document.getElementById('analyst-note');
+        const avgWordsEl = document.getElementById('avg-words');
+
+        // --- 4. Initialization Logic ---
+        function init() {
+            calculateAggregates();
+            renderPoemList();
+            loadPoem(0); // Load first poem by default
+            initBarChart();
+        }
+
+        function calculateAggregates() {
+            let totalWords = 0;
+            poems.forEach(p => {
+                const words = p.content.split(/\\s+/).filter(w => w.length > 0).length;
+                totalWords += words;
+            });
+            const avg = Math.round(totalWords / poems.length);
+            avgWordsEl.innerText = avg;
+        }
+
+        function renderPoemList() {
+            poemListEl.innerHTML = '';
+            poems.forEach((poem, index) => {
+                const btn = document.createElement('button');
+                btn.className = `btn-interactive w-full text-left px-4 py-3 rounded-md font-semibold text-sm mb-1 border border-[#EBDCCB] ${index === currentPoemIndex ? 'active-poem' : 'inactive-poem'}`;
+                btn.innerHTML = `<div class="flex justify-between"><span>${poem.title}</span> <span class="opacity-50 text-xs">${poem.author}</span></div>`;
+                btn.onclick = () => loadPoem(index);
+                poemListEl.appendChild(btn);
+            });
+        }
+
+        // --- 5. Core Interaction Handling ---
+        function loadPoem(index) {
+            currentPoemIndex = index;
+            const poem = poems[index];
+
+            // Update UI Text
+            titleEl.innerText = poem.title;
+            authorEl.innerText = poem.author;
+            contentEl.innerText = poem.content;
+            noteEl.innerText = poem.note;
+
+            // Update List Selection State
+            renderPoemList();
+
+            // Update Radar Chart
+            updateRadarChart(poem);
+        }
+
+        // --- 6. Chart Implementations ---
+
+        // Radar Chart (Individual Poem Analysis)
+        function updateRadarChart(poem) {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            const dataValues = [poem.themes.Self, poem.themes.Cosmos, poem.themes.Nature, poem.themes.Unity];
+
+            if (radarChartInstance) {
+                radarChartInstance.data.datasets[0].data = dataValues;
+                radarChartInstance.data.datasets[0].label = poem.title;
+                radarChartInstance.update();
+            } else {
+                radarChartInstance = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Self (Internal)', 'Cosmos (External)', 'Nature (Cycle)', 'Unity (Connection)'],
+                        datasets: [{
+                            label: poem.title,
+                            data: dataValues,
+                            fill: true,
+                            backgroundColor: 'rgba(173, 216, 230, 0.4)', // Pastel Aqua
+                            borderColor: '#8F7D6B', // Wet Sand
+                            pointBackgroundColor: '#FFC1D3', // Pastel Pink
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#FFC1D3'
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        elements: {
+                            line: { borderWidth: 2 }
+                        },
+                        scales: {
+                            r: {
+                                angleLines: { color: '#EBDCCB' }, // Dry Sand
+                                grid: { color: '#EBDCCB' },
+                                pointLabels: {
+                                    font: { size: 11, family: "'Lora', serif" },
+                                    color: '#6B5B4D'
+                                },
+                                suggestedMin: 0,
+                                suggestedMax: 100,
+                                ticks: { display: false } // Hide numbers for cleaner look
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Bar Chart (Aggregate Lexical Analysis)
+        function initBarChart() {
+            const ctx = document.getElementById('barChart').getContext('2d');
+            
+            // Calculate Aggregate Element Counts
+            let waterCount = 0;
+            let skyCount = 0;
+            let earthCount = 0;
+
+            poems.forEach(p => {
+                waterCount += p.wordStats.water;
+                skyCount += p.wordStats.sky;
+                earthCount += p.wordStats.earth;
+            });
+
+            barChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Water / Fluidity', 'Sky / Aether', 'Earth / Grounding'],
+                    datasets: [{
+                        label: 'Word Frequency',
+                        data: [waterCount, skyCount, earthCount],
+                        backgroundColor: [
+                            'rgba(173, 216, 230, 0.7)', // Aqua (Water)
+                            'rgba(216, 191, 216, 0.7)', // Lilac (Sky)
+                            'rgba(235, 220, 203, 0.9)'  // Dry Sand (Earth)
+                        ],
+                        borderColor: [
+                            '#ADD8E6',
+                            '#D8BFD8',
+                            '#8F7D6B'
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#f3f3f3' },
+                            ticks: { color: '#8F7D6B' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { 
+                                color: '#8F7D6B',
+                                font: { family: "'Playfair Display', serif", size: 12 }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#8F7D6B',
+                            titleFont: { family: "'Playfair Display', serif" },
+                            bodyFont: { family: "'Lora', serif" }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Start App
+        window.onload = init;
+
+    </script>
+</body>
+</html>
